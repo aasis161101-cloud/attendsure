@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>AttendSure</title>
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="theme-color" content="#3B4CC0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* ============ DESIGN TOKENS ============ */
+:root{
+  --ink:#1B2340;
+  --ink-soft:#4A5170;
+  --bg:#F5F6FB;
+  --surface:#FFFFFF;
+  --surface-2:#EEF0F9;
+  --line:#E1E4F0;
+  --teal:#0F9E8E;
+  --teal-soft:#E3F7F3;
+  --coral:#F0525C;
+  --coral-soft:#FDEAEB;
+  --amber:#E8A73C;
+  --amber-soft:#FCF3E1;
+  --indigo:#3B4CC0;
+  --indigo-soft:#EAECFB;
+  --radius-l:20px;
+  --radius-m:14px;
+  --radius-s:9px;
+  --shadow: 0 2px 14px rgba(27,35,64,0.06);
+  --shadow-lift: 0 10px 30px rgba(27,35,64,0.14);
+  --font-display:'Space Grotesk', sans-serif;
+  --font-body:'Inter', sans-serif;
+  --font-mono:'JetBrains Mono', monospace;
+}
+[data-theme="dark"]{
+  --ink:#EDEFFA;
+  --ink-soft:#A7ACC8;
+  --bg:#10121C;
+  --surface:#191C2B;
+  --surface-2:#20233560;
+  --surface-2:#232640;
+  --line:#2C2F48;
+  --teal:#2BC9B4;
+  --teal-soft:#123531;
+  --coral:#FF6B74;
+  --coral-soft:#3A1D22;
+  --amber:#F0BB5E;
+  --amber-soft:#3A2E15;
+  --indigo:#8C9AFF;
+  --indigo-soft:#212550;
+  --shadow: 0 2px 14px rgba(0,0,0,0.35);
+  --shadow-lift: 0 10px 30px rgba(0,0,0,0.5);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:none;
+}
+#app{max-width:480px;margin:0 auto;min-height:100vh;position:relative;padding-bottom:84px;}
+::selection{background:var(--teal);color:#fff;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+a{color:inherit;}
+
+/* ---- Header ---- */
+.topbar{
+  padding:22px 20px 14px;
+  display:flex;justify-content:space-between;align-items:flex-start;
+}
+.brand{display:flex;flex-direction:column;gap:4px;}
+.brand .sub{font-size:12.5px;color:var(--ink-soft);font-family:var(--font-mono);margin-left:2px;}
+.headerbtn{
+  width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);
+  display:flex;align-items:center;justify-content:center;color:var(--ink-soft);
+  box-shadow:var(--shadow);
+}
+
+/* ---- Cards ---- */
+.card{
+  background:var(--surface);
+  border-radius:var(--radius-l);
+  box-shadow:var(--shadow);
+  padding:18px;
+  border:1px solid var(--line);
+}
+.section{padding:0 20px;margin-bottom:16px;}
+.section-title{
+  font-family:var(--font-display);font-weight:600;font-size:14px;letter-spacing:0.02em;
+  text-transform:uppercase;color:var(--ink-soft);margin:0 0 10px 2px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.section-title .link{font-family:var(--font-body);text-transform:none;font-weight:600;font-size:13px;color:var(--indigo);letter-spacing:0;}
+
+/* ---- Next Class Hero ---- */
+.hero{
+  margin:0 20px 16px;
+  border-radius:var(--radius-l);
+  background:linear-gradient(135deg,var(--indigo) 0%, #232E8F 100%);
+  color:#fff;padding:22px;position:relative;overflow:hidden;box-shadow:var(--shadow-lift);
+}
+[data-theme="dark"] .hero{background:linear-gradient(135deg,#3B4CC0 0%, #1C2470 100%);}
+.hero::after{
+  content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;
+  background:rgba(255,255,255,0.08);
+}
+.hero .eyebrow{font-family:var(--font-mono);font-size:11.5px;opacity:0.75;text-transform:uppercase;letter-spacing:0.08em;}
+.hero .subj{font-family:var(--font-display);font-weight:700;font-size:22px;margin:6px 0 2px;line-height:1.15;}
+.hero .meta{font-size:13px;opacity:0.85;font-family:var(--font-mono);margin-bottom:16px;}
+.hero .meta span{margin-right:12px;}
+.checkin-btn{
+  width:100%;padding:15px;border:none;border-radius:var(--radius-m);
+  background:#fff;color:var(--indigo);font-weight:700;font-size:15.5px;font-family:var(--font-display);
+  display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 18px rgba(0,0,0,0.18);
+  transition:transform .12s ease;
+}
+.checkin-btn:active{transform:scale(0.97);}
+.checkin-btn.done{background:rgba(255,255,255,0.16);color:#fff;box-shadow:none;}
+.checkin-btn.missed{background:var(--coral);color:#fff;}
+.hero-empty{font-size:14px;opacity:0.9;padding:6px 0 2px;}
+
+/* ---- Ring / Stat ---- */
+.stat-row{display:flex;gap:12px;margin:0 20px 16px;}
+.stat-card{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-m);padding:14px;box-shadow:var(--shadow);}
+.stat-card .num{font-family:var(--font-display);font-weight:700;font-size:22px;}
+.stat-card .lbl{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+.ring-wrap{display:flex;align-items:center;gap:16px;}
+.ring-wrap svg{flex-shrink:0;}
+.ring-center{font-family:var(--font-display);font-weight:700;font-size:20px;}
+
+/* ---- Day rail (timetable) ---- */
+.rail{position:relative;padding-left:22px;}
+.rail::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:var(--line);}
+.rail-item{position:relative;margin-bottom:12px;}
+.rail-item::before{
+  content:"";position:absolute;left:-22px;top:18px;width:11px;height:11px;border-radius:50%;
+  background:var(--surface);border:2.5px solid var(--indigo);
+}
+.rail-item.present::before{border-color:var(--teal);background:var(--teal);}
+.rail-item.missed::before{border-color:var(--coral);background:var(--coral);}
+.class-card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-m);
+  padding:13px 14px;box-shadow:var(--shadow);
+}
+.class-card .row1{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.class-card .name{font-weight:600;font-size:14.5px;}
+.class-card .time{font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);margin-top:3px;}
+.class-card .meta2{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+.badge{
+  font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.03em;
+  white-space:nowrap;
+}
+.badge.present{background:var(--teal-soft);color:var(--teal);}
+.badge.missed{background:var(--coral-soft);color:var(--coral);}
+.badge.upcoming{background:var(--surface-2);color:var(--ink-soft);}
+.badge.now{background:var(--amber-soft);color:var(--amber);}
+.mini-btn{
+  border:none;border-radius:8px;padding:7px 11px;font-size:12px;font-weight:600;margin-top:9px;
+  background:var(--indigo);color:#fff;
+}
+.mini-btn.ghost{background:var(--surface-2);color:var(--ink);}
+.mini-btn.coral{background:var(--coral);color:#fff;}
+.row-btns{display:flex;gap:8px;}
+
+/* ---- Bottom nav ---- */
+.bottomnav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;
+  background:var(--surface);border-top:1px solid var(--line);
+  display:flex;padding:8px 6px calc(10px + env(safe-area-inset-bottom));
+  box-shadow:0 -4px 20px rgba(0,0,0,0.05);z-index:50;
+}
+.navbtn{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;
+  color:var(--ink-soft);font-size:10.5px;font-weight:600;padding:6px 0;border-radius:12px;
+}
+.navbtn.active{color:var(--indigo);}
+.navbtn svg{width:21px;height:21px;}
+
+/* ---- Tabs / chips ---- */
+.chiprow{display:flex;gap:8px;overflow-x:auto;padding:0 20px 12px;scrollbar-width:none;}
+.chiprow::-webkit-scrollbar{display:none;}
+.chip{
+  flex-shrink:0;padding:7px 14px;border-radius:20px;border:1px solid var(--line);background:var(--surface);
+  font-size:12.5px;font-weight:600;color:var(--ink-soft);
+}
+.chip.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
+
+/* ---- Forms / modal ---- */
+.overlay{
+  position:fixed;inset:0;background:rgba(10,12,25,0.5);display:flex;align-items:flex-end;justify-content:center;
+  z-index:100;
+}
+.sheet{
+  background:var(--surface);width:100%;max-width:480px;border-radius:22px 22px 0 0;padding:20px 20px calc(24px + env(safe-area-inset-bottom));
+  max-height:88vh;overflow-y:auto;
+}
+.sheet h3{font-family:var(--font-display);margin:0 0 14px;font-size:18px;}
+.field{margin-bottom:13px;}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:5px;}
+.field input,.field select{
+  width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);
+  color:var(--ink);font-size:14px;
+}
+.field-row{display:flex;gap:10px;}
+.field-row .field{flex:1;}
+.sheet-actions{display:flex;gap:10px;margin-top:6px;}
+.btn{
+  flex:1;padding:13px;border-radius:12px;border:none;font-weight:700;font-size:14px;font-family:var(--font-display);
+}
+.btn.primary{background:var(--indigo);color:#fff;}
+.btn.ghost{background:var(--surface-2);color:var(--ink);}
+.btn.danger{background:var(--coral-soft);color:var(--coral);}
+.closebtn{position:absolute;top:16px;right:18px;color:var(--ink-soft);background:none;border:none;font-size:20px;}
+
+/* ---- Misc ---- */
+.empty{text-align:center;padding:40px 20px;color:var(--ink-soft);font-size:13.5px;}
+.fab{
+  position:fixed;bottom:96px;left:50%;transform:translateX(155px);width:52px;height:52px;border-radius:50%;
+  background:var(--indigo);color:#fff;border:none;box-shadow:var(--shadow-lift);font-size:26px;
+  display:flex;align-items:center;justify-content:center;z-index:40;
+}
+.subject-pill{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius-m);background:var(--surface);margin-bottom:10px;box-shadow:var(--shadow);}
+.subject-pill .left{display:flex;align-items:center;gap:10px;}
+.swatch{width:9px;height:32px;border-radius:5px;}
+.hist-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);}
+.hist-row:last-child{border-bottom:none;}
+.hist-left .subj{font-weight:600;font-size:13.5px;}
+.hist-left .d{font-size:11.5px;color:var(--ink-soft);font-family:var(--font-mono);margin-top:2px;}
+.warn-row{display:flex;justify-content:space-between;align-items:center;background:var(--coral-soft);border-radius:12px;padding:11px 13px;margin-bottom:8px;}
+.warn-row .t{font-size:13px;font-weight:600;color:var(--coral);}
+.progress-bar{height:6px;border-radius:4px;background:var(--surface-2);overflow:hidden;margin-top:8px;}
+.progress-bar > div{height:100%;border-radius:4px;}
+.toast{
+  position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);
+  padding:11px 18px;border-radius:30px;font-size:13px;font-weight:600;z-index:200;box-shadow:var(--shadow-lift);
+  opacity:0;transition:opacity .25s ease;pointer-events:none;
+}
+.toast.show{opacity:1;}
+.segmented{display:flex;background:var(--surface-2);border-radius:11px;padding:3px;margin-bottom:14px;}
+.segmented button{flex:1;padding:9px;border:none;background:none;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--ink-soft);}
+.segmented button.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+canvas{max-width:100%;}
+h1,h2,h3{font-family:var(--font-display);}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   STORAGE SHIM
+   Uses Claude's built-in window.storage when running inside a
+   Claude artifact. Falls back to browser localStorage when this
+   file is hosted standalone (e.g. on GitHub Pages), so the exact
+   same file works in both places.
+   ============================================================ */
+if(!window.storage){
+  window.storage = {
+    async get(key){
+      const v = localStorage.getItem('attendsure:'+key);
+      if(v===null) return null;
+      return {key, value:v};
+    },
+    async set(key, value){
+      localStorage.setItem('attendsure:'+key, value);
+      return {key, value};
+    },
+    async delete(key){
+      localStorage.removeItem('attendsure:'+key);
+      return {key, deleted:true};
+    },
+    async list(prefix){
+      const keys = Object.keys(localStorage)
+        .filter(k=>k.startsWith('attendsure:'+(prefix||'')))
+        .map(k=>k.replace('attendsure:',''));
+      return {keys};
+    }
+  };
+}
+
+/* ============================================================
+   ATTENDSURE — data model
+   ============================================================ */
+const SUBJECTS = [
+  {code:'ULF24AE1J', name:'French-I', teacher:'Mr. Ankur Rai', initials:'ANR', color:'#3B4CC0'},
+  {code:'ULE24AE1J', name:'English', teacher:'New Faculty', initials:'NF', color:'#0F9E8E'},
+  {code:'UCA24101J', name:'Digital Logic Design', teacher:'Dr. Akshita Chaudhary', initials:'ACH', color:'#E8A73C'},
+  {code:'USA24102J', name:'Programming for Problem Solving', teacher:'Ms. Vishakha Sharma', initials:'VIS', color:'#F0525C'},
+  {code:'UMS24101T', name:'Discrete Mathematical Structures', teacher:'Dr. Sohan Lal Tyagi', initials:'SLT', color:'#8C4CC0'},
+  {code:'UCD24S01J', name:'Verbal Ability and Skills Development', teacher:'Ms. Manisha Chaudhary', initials:'MAC', color:'#2B8FC9'},
+];
+function subjByName(n){ return SUBJECTS.find(s=>s.name===n) || {color:'#888', initials:'--'}; }
+
+// day: 1=Sun ... but timetable only uses Mon-Fri => 2..6 (JS getDay: Sun=0)
+const DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+function slot(day, subject, start, end, type, room){
+  return {id: day+'-'+start+'-'+subject.replace(/\s/g,''), day, subject, start, end, type: type||'Lecture', room: room||'304', teacher: subjByName(subject).teacher};
+}
+const DEFAULT_TIMETABLE = [
+  // Monday
+  slot('Monday','English','09:30','10:20'),
+  slot('Monday','Digital Logic Design','10:20','11:10'),
+  slot('Monday','French-I','11:20','12:10'),
+  slot('Monday','Discrete Mathematical Structures','12:10','13:00'),
+  slot('Monday','Programming for Problem Solving','14:10','15:50'),
+  // Tuesday
+  slot('Tuesday','English','09:30','10:20'),
+  slot('Tuesday','Digital Logic Design','10:20','11:10'),
+  slot('Tuesday','French-I','11:20','12:10','Practical'),
+  slot('Tuesday','Discrete Mathematical Structures','12:10','13:00'),
+  slot('Tuesday','Discrete Mathematical Structures','14:10','15:00'),
+  slot('Tuesday','Programming for Problem Solving','15:00','15:50','Practical'),
+  // Wednesday
+  slot('Wednesday','Digital Logic Design','09:30','11:10','Practical'),
+  slot('Wednesday','French-I','11:20','12:10','Practical'),
+  slot('Wednesday','Digital Logic Design','12:10','13:00'),
+  slot('Wednesday','Verbal Ability and Skills Development','14:10','15:00'),
+  // Thursday
+  slot('Thursday','French-I','09:30','10:20','Practical'),
+  slot('Thursday','Programming for Problem Solving','10:20','11:10'),
+  slot('Thursday','French-I','11:20','12:10'),
+  slot('Thursday','Discrete Mathematical Structures','12:10','13:00'),
+  slot('Thursday','Verbal Ability and Skills Development','14:10','15:00'),
+  // Friday
+  slot('Friday','French-I','09:30','10:20','Practical'),
+  slot('Friday','Programming for Problem Solving','10:20','11:10'),
+  slot('Friday','Digital Logic Design','11:20','12:10','Practical'),
+  slot('Friday','Verbal Ability and Skills Development','12:10','13:00'),
+  slot('Friday','Discrete Mathematical Structures','14:10','15:00'),
+];
+
+const DEFAULT_SETTINGS = {
+  studentName:'', college:'SRM Institute of Science & Technology, Delhi-NCR Campus, Modinagar, Ghaziabad',
+  course:'BCA — First Year', semester:'Semester 1', target:75, notifEnabled:true, reminderMins:15,
+  theme:'system', semesterStart: '', calcMethod:'standard'
+};
+
+/* ============================================================
+   STORAGE LAYER  (persists across sessions via window.storage)
+   ============================================================ */
+let TT = null, ATT = null, SET = null;
+let TT_V=null, ATT_V=null, SET_V=null;
+
+async function loadAll(){
+  try{
+    const t = await window.storage.get('timetable');
+    TT = t? JSON.parse(t.value): DEFAULT_TIMETABLE.slice();
+  }catch(e){ TT = DEFAULT_TIMETABLE.slice(); }
+  try{
+    const a = await window.storage.get('attendance');
+    ATT = a? JSON.parse(a.value): [];
+  }catch(e){ ATT = []; }
+  try{
+    const s = await window.storage.get('settings');
+    SET = s? Object.assign({}, DEFAULT_SETTINGS, JSON.parse(s.value)) : Object.assign({}, DEFAULT_SETTINGS);
+  }catch(e){ SET = Object.assign({}, DEFAULT_SETTINGS); }
+  if(!SET.semesterStart){
+    // default: most recent Monday 8 weeks ago-ish start; use first day of current month as sane fallback
+    const d = new Date(); d.setDate(d.getDate()-42);
+    SET.semesterStart = d.toISOString().slice(0,10);
+  }
+}
+async function saveTT(){ await window.storage.set('timetable', JSON.stringify(TT)); }
+async function saveATT(){ await window.storage.set('attendance', JSON.stringify(ATT)); }
+async function saveSET(){ await window.storage.set('settings', JSON.stringify(SET)); }
+
+/* ============================================================
+   DATE / TIME HELPERS
+   ============================================================ */
+function pad(n){return n<10?'0'+n:''+n;}
+function dstr(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function todayStr(){return dstr(new Date());}
+function fmtTime(hhmm){
+  const [h,m]=hhmm.split(':').map(Number);
+  const ampm = h>=12?'PM':'AM'; let hh=h%12; if(hh===0)hh=12;
+  return hh+':'+pad(m)+' '+ampm;
+}
+function fmtDateNice(ds){
+  const d = new Date(ds+'T00:00:00');
+  return d.toLocaleDateString('en-IN',{weekday:'short', day:'numeric', month:'short'});
+}
+function timeToMin(hhmm){const [h,m]=hhmm.split(':').map(Number); return h*60+m;}
+function nowMin(){const d=new Date(); return d.getHours()*60+d.getMinutes();}
+function dayNameOf(ds){ return DAY_NAMES[new Date(ds+'T00:00:00').getDay()]; }
+
+/* generate the ordered list of dates from semesterStart..today (inclusive) restricted to weekdays present in timetable */
+function allDatesUpTo(endDs){
+  const dates=[];
+  let cur = new Date(SET.semesterStart+'T00:00:00');
+  const end = new Date(endDs+'T00:00:00');
+  while(cur<=end){
+    dates.push(dstr(cur));
+    cur.setDate(cur.getDate()+1);
+  }
+  return dates;
+}
+
+/* ============================================================
+   ATTENDANCE ENGINE
+   ============================================================ */
+function classesOnDay(dayName){
+  return TT.filter(c=>c.day===dayName).sort((a,b)=>timeToMin(a.start)-timeToMin(b.start));
+}
+function recordId(classId, ds){ return classId+'__'+ds; }
+function findRecord(classId, ds){ return ATT.find(r=>r.recId===recordId(classId,ds)); }
+
+// ensure Missed records exist for every past scheduled class with no check-in
+function reconcileMissed(){
+  const today = todayStr();
+  const dates = allDatesUpTo(today);
+  const nMin = nowMin();
+  let changed=false;
+  dates.forEach(ds=>{
+    const dn = dayNameOf(ds);
+    const classes = classesOnDay(dn);
+    classes.forEach(c=>{
+      const isToday = ds===today;
+      const ended = isToday ? (nMin > timeToMin(c.end)) : true;
+      if(!ended) return;
+      const existing = findRecord(c.id, ds);
+      if(!existing){
+        ATT.push({
+          recId: recordId(c.id, ds), classId:c.id, subject:c.subject, date:ds, day:dn,
+          scheduledStart:c.start, scheduledEnd:c.end, checkInTime:null, status:'Missed',
+          editHistory:[{ts:new Date().toISOString(), action:'auto-marked-missed'}]
+        });
+        changed=true;
+      }
+    });
+  });
+  if(changed) saveATT();
+}
+
+function checkIn(classId){
+  const ds = todayStr();
+  const c = TT.find(x=>x.id===classId);
+  if(!c) return;
+  const now = new Date();
+  const existing = findRecord(classId, ds);
+  if(existing){
+    if(existing.status==='Present'){ showToast('Already checked in'); return; }
+    existing.status='Present';
+    existing.checkInTime = now.toTimeString().slice(0,5);
+    existing.editHistory.push({ts:now.toISOString(), action:'manual-checkin (was '+existing.status+')'});
+  }else{
+    ATT.push({
+      recId: recordId(classId, ds), classId, subject:c.subject, date:ds, day:c.day,
+      scheduledStart:c.start, scheduledEnd:c.end, checkInTime: now.toTimeString().slice(0,5),
+      status:'Present', editHistory:[{ts:now.toISOString(), action:'checked-in'}]
+    });
+  }
+  saveATT();
+  showToast('Checked in ✓');
+  render();
+}
+
+function setStatus(recId, status){
+  const r = ATT.find(x=>x.recId===recId);
+  if(!r) return;
+  const from = r.status;
+  r.status = status;
+  if(status==='Missed') r.checkInTime=null;
+  r.editHistory.push({ts:new Date().toISOString(), action:'manual: '+from+' → '+status});
+  saveATT();
+  render();
+}
+
+function statsFor(records){
+  const bySubj = {};
+  SUBJECTS.forEach(s=>bySubj[s.name]={total:0,present:0,missed:0});
+  records.forEach(r=>{
+    if(!bySubj[r.subject]) bySubj[r.subject]={total:0,present:0,missed:0};
+    bySubj[r.subject].total++;
+    if(r.status==='Present') bySubj[r.subject].present++;
+    else bySubj[r.subject].missed++;
+  });
+  Object.values(bySubj).forEach(v=>{ v.pct = v.total? Math.round(v.present/v.total*1000)/10 : null; });
+  return bySubj;
+}
+function overallStats(){
+  reconcileMissed();
+  return statsFor(ATT);
+}
+function recordsInRange(startDs, endDs){
+  return ATT.filter(r=> r.date>=startDs && r.date<=endDs);
+}
+function weekRange(anchorDs){
+  const d = new Date(anchorDs+'T00:00:00');
+  const dow = d.getDay(); // Sun=0
+  const diffToMon = (dow===0? -6 : 1-dow);
+  const mon = new Date(d); mon.setDate(d.getDate()+diffToMon);
+  const sun = new Date(mon); sun.setDate(mon.getDate()+6);
+  return [dstr(mon), dstr(sun)];
+}
+function monthRange(year, month){ // month 0-indexed
+  const first = new Date(year, month, 1);
+  const last = new Date(year, month+1, 0);
+  return [dstr(first), dstr(last)];
+}
+
+/* ============================================================
+   APP STATE / ROUTER
+   ============================================================ */
+let TAB='home';
+let weekAnchor = todayStr();
+let monthAnchor = new Date();
+let historyFilter = {subject:'all', status:'all'};
+let editingClass = null;
+let editingRecord = null;
+
+function showToast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(window.__toastT); window.__toastT=setTimeout(()=>t.classList.remove('show'),1800);
+}
+function applyTheme(){
+  const root=document.documentElement;
+  let t = SET.theme;
+  if(t==='system'){ t = window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'; }
+  if(t==='dark') root.setAttribute('data-theme','dark'); else root.removeAttribute('data-theme');
+}
+
+function icon(name){
+  const icons={
+    home:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/>',
+    cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
+    check:'<circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.4 2.4L16 10"/>',
+    chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+    user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/>',
+    close:'<path d="M18 6 6 18M6 6l12 12"/>',
+    plus:'<path d="M12 5v14M5 12h14"/>',
+    pdf:'<path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/>',
+    bell:'<path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 21a2 2 0 0 0 4 0"/>',
+    edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+    trash:'<path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
+  };
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${icons[name]||''}</svg>`;
+}
+
+/* ============================================================
+   RENDER: HOME
+   ============================================================ */
+function findNextOrCurrentClass(){
+  const ds = todayStr();
+  const dn = dayNameOf(ds);
+  const classes = classesOnDay(dn);
+  const nm = nowMin();
+  let current=null, next=null;
+  for(const c of classes){
+    const s=timeToMin(c.start), e=timeToMin(c.end);
+    if(nm>=s && nm<e){ current=c; break; }
+  }
+  if(!current){
+    next = classes.find(c=>timeToMin(c.start)>nm) || null;
+  }
+  return {current, next, classes};
+}
+
+function renderHome(){
+  const ds = todayStr();
+  reconcileMissed();
+  const {current, next, classes} = findNextOrCurrentClass();
+  const featured = current || next;
+  const featuredRec = featured? findRecord(featured.id, ds): null;
+
+  let heroHtml;
+  if(classes.length===0){
+    heroHtml = `<div class="hero"><div class="eyebrow">Today · ${fmtDateNice(ds)}</div><div class="subj">No classes today</div><div class="hero-empty">Enjoy the day off 🎉</div></div>`;
+  }else if(!featured){
+    heroHtml = `<div class="hero"><div class="eyebrow">Today · ${fmtDateNice(ds)}</div><div class="subj">All classes done for today</div><div class="hero-empty">Check today's attendance below.</div></div>`;
+  }else{
+    const isCurrent = !!current;
+    const status = featuredRec? featuredRec.status : null;
+    let btnHtml;
+    if(status==='Present'){
+      btnHtml = `<button class="checkin-btn done">${icon('check')} Checked in at ${fmtTime(featuredRec.checkInTime)}</button>`;
+    }else if(status==='Missed'){
+      btnHtml = `<button class="checkin-btn missed" onclick="checkIn('${featured.id}')">${icon('check')} Marked missed — tap to fix</button>`;
+    }else{
+      btnHtml = `<button class="checkin-btn" onclick="checkIn('${featured.id}')">${icon('check')} Check In</button>`;
+    }
+    heroHtml = `<div class="hero">
+      <div class="eyebrow">${isCurrent? 'Happening now':'Next class'} · ${featured.type!=='Lecture'?featured.type:''}</div>
+      <div class="subj">${featured.subject}</div>
+      <div class="meta"><span>${fmtTime(featured.start)} – ${fmtTime(featured.end)}</span><span>Room ${featured.room}</span></div>
+      ${btnHtml}
+    </div>`;
+  }
+
+  const os = overallStats();
+  const overallTotal = Object.values(os).reduce((a,v)=>a+v.total,0);
+  const overallPresent = Object.values(os).reduce((a,v)=>a+v.present,0);
+  const overallPct = overallTotal? Math.round(overallPresent/overallTotal*1000)/10 : 0;
+  const todayRecs = ATT.filter(r=>r.date===ds);
+  const todayPresent = todayRecs.filter(r=>r.status==='Present').length;
+
+  const below = Object.entries(os).filter(([k,v])=>v.total>0 && v.pct<SET.target);
+
+  const ringHtml = ringSVG(overallPct, 74, 8, ringColor(overallPct));
+
+  let sectionHtml = `
+  <div class="stat-row">
+    <div class="stat-card"><div class="ring-wrap">${ringHtml}<div><div class="num" style="font-size:17px">${overallPct}%</div><div class="lbl">Overall attendance</div></div></div></div>
+  </div>
+  <div class="stat-row">
+    <div class="stat-card"><div class="num">${todayPresent}/${todayRecs.length}</div><div class="lbl">Today checked in</div></div>
+    <div class="stat-card"><div class="num">${overallPresent}/${overallTotal}</div><div class="lbl">Total attended</div></div>
+  </div>`;
+
+  let warnHtml='';
+  if(below.length){
+    warnHtml = `<div class="section"><div class="section-title">Below Target (${SET.target}%)</div>`+
+      below.map(([k,v])=>`<div class="warn-row"><div class="t">⚠️ ${k} — ${v.pct}%</div><div style="font-size:11.5px;color:var(--ink-soft)">target ${SET.target}%</div></div>`).join('')+
+      `</div>`;
+  }
+
+  let todayListHtml = `<div class="section"><div class="section-title">Today's Classes</div>`;
+  if(classes.length===0){
+    todayListHtml += `<div class="empty">No scheduled classes today.</div>`;
+  }else{
+    todayListHtml += `<div class="rail">` + classes.map(c=>{
+      const r = findRecord(c.id, ds);
+      const s=timeToMin(c.start), e=timeToMin(c.end), nm=nowMin();
+      let cls='', badge;
+      if(r && r.status==='Present'){ cls='present'; badge=`<span class="badge present">Present</span>`; }
+      else if(r && r.status==='Missed'){ cls='missed'; badge=`<span class="badge missed">Missed</span>`; }
+      else if(nm>=s && nm<e){ badge=`<span class="badge now">Now</span>`; }
+      else if(nm<s){ badge=`<span class="badge upcoming">Upcoming</span>`; }
+      else { badge=`<span class="badge upcoming">—</span>`; }
+      return `<div class="rail-item ${cls}"><div class="class-card">
+        <div class="row1"><div><div class="name">${c.subject}</div><div class="time">${fmtTime(c.start)} – ${fmtTime(c.end)} · Room ${c.room}</div></div>${badge}</div>
+        ${!r || r.status!=='Present' ? `<button class="mini-btn" onclick="checkIn('${c.id}')">Check In</button>` : `<button class="mini-btn ghost" onclick="openRecordEditor('${r.recId}')">Not actually present? Edit</button>`}
+      </div></div>`;
+    }).join('') + `</div></div>`;
+  }
+
+  return `
+    ${topbarHtml('Home')}
+    ${heroHtml}
+    ${sectionHtml}
+    ${warnHtml}
+    ${todayListHtml}
+  `;
+}
+
+function ringColor(pct){
+  if(pct>=SET.target) return 'var(--teal)';
+  if(pct>=SET.target-10) return 'var(--amber)';
+  return 'var(--coral)';
+}
+function ringSVG(pct, size, stroke, color){
+  const r=(size-stroke)/2, c=2*Math.PI*r;
+  const off = c - (Math.max(0,Math.min(100,pct))/100)*c;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="${stroke}"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round"
+      stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 ${size/2} ${size/2})"/>
+  </svg>`;
+}
+
+const LOGO_SVG = `<svg width="140" height="32" viewBox="0 0 220 50" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AttendSure">
+  <defs><linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#3B4CC0"/><stop offset="100%" stop-color="#0F9E8E"/></linearGradient></defs>
+  <rect x="2" y="2" width="46" height="46" rx="12" fill="url(#lg1)"/>
+  <circle cx="25" cy="25" r="12" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="3"/>
+  <circle cx="25" cy="25" r="12" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="75.4" stroke-dashoffset="18.85" transform="rotate(-90 25 25)"/>
+  <path d="M18 26 L23 31 L33 19" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="44" cy="8" r="4" fill="#F5A623"/>
+  <text x="60" y="33" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="24" fill="currentColor">Attend<tspan fill="#0F9E8E">Sure</tspan></text>
+</svg>`;
+function topbarHtml(pageLabel){
+  return `<div class="topbar">
+    <div class="brand" style="color:var(--ink)">${LOGO_SVG}<div class="sub">${fmtDateNice(todayStr())}</div></div>
+    <button class="headerbtn" onclick="go('profile')">${icon('user')}</button>
+  </div>`;
+}
+
+/* ============================================================
+   RENDER: TIMETABLE
+   ============================================================ */
+let ttDay = dayNameOf(todayStr()); if(!DAY_NAMES.slice(1,6).includes(ttDay)) ttDay='Monday';
+function renderTimetable(){
+  const days=['Monday','Tuesday','Wednesday','Thursday','Friday'];
+  const chips = days.map(d=>`<button class="chip ${d===ttDay?'active':''}" onclick="ttDay='${d}';render()">${d.slice(0,3)}</button>`).join('');
+  const classes = classesOnDay(ttDay);
+  let list = classes.length? classes.map(c=>{
+    const sub = subjByName(c.subject);
+    return `<div class="class-card" style="margin-bottom:10px;">
+      <div class="row1">
+        <div><div class="name">${c.subject}</div><div class="time">${fmtTime(c.start)} – ${fmtTime(c.end)}</div>
+        <div class="meta2">${c.teacher||''} · Room ${c.room} ${c.type!=='Lecture'?'· '+c.type:''}</div></div>
+        <button class="headerbtn" style="width:32px;height:32px;flex-shrink:0" onclick='openClassEditor(${JSON.stringify(c.id)})'>${icon('edit')}</button>
+      </div>
+    </div>`;
+  }).join('') : `<div class="empty">No classes on ${ttDay}.<br>Tap + to add one.</div>`;
+
+  return `
+    ${topbarHtml('Timetable')}
+    <div class="section"><div class="section-title">Weekly Timetable</div></div>
+    <div class="chiprow">${chips}</div>
+    <div class="section">${list}</div>
+    <button class="fab" onclick="openClassEditor(null)">${icon('plus')}</button>
+  `;
+}
+
+function openClassEditor(classId){
+  editingClass = classId? TT.find(c=>c.id===classId) : null;
+  const c = editingClass || {day:ttDay, subject:SUBJECTS[0].name, start:'09:30', end:'10:20', type:'Lecture', room:'304'};
+  const subjOptions = SUBJECTS.map(s=>`<option value="${s.name}" ${c.subject===s.name?'selected':''}>${s.name}</option>`).join('');
+  const dayOptions = ['Monday','Tuesday','Wednesday','Thursday','Friday'].map(d=>`<option ${c.day===d?'selected':''}>${d}</option>`).join('');
+  openSheet(`
+    <h3>${editingClass? 'Edit Class':'Add Class'}</h3>
+    <div class="field"><label>Subject</label><select id="f_subject">${subjOptions}</select></div>
+    <div class="field"><label>Day</label><select id="f_day">${dayOptions}</select></div>
+    <div class="field-row">
+      <div class="field"><label>Start time</label><input type="time" id="f_start" value="${c.start}"></div>
+      <div class="field"><label>End time</label><input type="time" id="f_end" value="${c.end}"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Type</label><select id="f_type"><option ${c.type==='Lecture'?'selected':''}>Lecture</option><option ${c.type==='Practical'?'selected':''}>Practical</option></select></div>
+      <div class="field"><label>Room</label><input id="f_room" value="${c.room}"></div>
+    </div>
+    <div class="sheet-actions">
+      ${editingClass?`<button class="btn danger" onclick="deleteClass('${editingClass.id}')">${'Delete'}</button>`:''}
+      <button class="btn ghost" onclick="closeSheet()">Cancel</button>
+      <button class="btn primary" onclick="saveClass()">Save</button>
+    </div>
+  `);
+}
+function saveClass(){
+  const subject = document.getElementById('f_subject').value;
+  const day = document.getElementById('f_day').value;
+  const start = document.getElementById('f_start').value;
+  const end = document.getElementById('f_end').value;
+  const type = document.getElementById('f_type').value;
+  const room = document.getElementById('f_room').value;
+  if(!start||!end){ showToast('Set start and end time'); return; }
+  if(editingClass){
+    Object.assign(editingClass, {subject, day, start, end, type, room, teacher: subjByName(subject).teacher});
+  }else{
+    TT.push({id:'c_'+Date.now(), subject, day, start, end, type, room, teacher: subjByName(subject).teacher});
+  }
+  saveTT(); closeSheet(); ttDay=day; render(); showToast('Timetable updated');
+}
+function deleteClass(id){
+  TT = TT.filter(c=>c.id!==id);
+  saveTT(); closeSheet(); render(); showToast('Class deleted');
+}
+
+/* ============================================================
+   RENDER: ATTENDANCE (weekly/monthly/overall + history)
+   ============================================================ */
+let attMode='weekly';
+function renderAttendance(){
+  reconcileMissed();
+  const seg = `<div class="segmented">
+    <button class="${attMode==='weekly'?'active':''}" onclick="attMode='weekly';render()">Weekly</button>
+    <button class="${attMode==='monthly'?'active':''}" onclick="attMode='monthly';render()">Monthly</button>
+    <button class="${attMode==='overall'?'active':''}" onclick="attMode='overall';render()">Overall</button>
+    <button class="${attMode==='history'?'active':''}" onclick="attMode='history';render()">History</button>
+  </div>`;
+
+  let body='';
+  if(attMode==='weekly') body = renderWeekly();
+  else if(attMode==='monthly') body = renderMonthly();
+  else if(attMode==='overall') body = renderOverall();
+  else body = renderHistory();
+
+  return `${topbarHtml('Attendance')}<div class="section">${seg}</div>${body}`;
+}
+
+function renderWeekly(){
+  const [mon,sun] = weekRange(weekAnchor);
+  const recs = recordsInRange(mon,sun);
+  const stats = statsFor(recs);
+  const nav = `<div class="section" style="display:flex;justify-content:space-between;align-items:center;">
+    <button class="mini-btn ghost" onclick="shiftWeek(-1)">← Prev</button>
+    <div style="font-size:12.5px;font-weight:600;font-family:var(--font-mono)">${fmtDateNice(mon)} – ${fmtDateNice(sun)}</div>
+    <button class="mini-btn ghost" onclick="shiftWeek(1)">Next →</button>
+  </div>`;
+  return nav + subjectStatCards(stats) + `<div class="section"><button class="btn ghost" style="width:100%" onclick="exportPDF('weekly','${mon}','${sun}')">${icon('pdf')} Export weekly PDF</button></div>`;
+}
+function shiftWeek(dir){
+  const d = new Date(weekAnchor+'T00:00:00'); d.setDate(d.getDate()+dir*7); weekAnchor=dstr(d); render();
+}
+function renderMonthly(){
+  const y = monthAnchor.getFullYear(), m = monthAnchor.getMonth();
+  const [first,last] = monthRange(y,m);
+  const recs = recordsInRange(first, last<todayStr()?last:todayStr());
+  const stats = statsFor(recs);
+  const nav = `<div class="section" style="display:flex;justify-content:space-between;align-items:center;">
+    <button class="mini-btn ghost" onclick="shiftMonth(-1)">← Prev</button>
+    <div style="font-size:12.5px;font-weight:600;font-family:var(--font-mono)">${monthAnchor.toLocaleDateString('en-IN',{month:'long',year:'numeric'})}</div>
+    <button class="mini-btn ghost" onclick="shiftMonth(1)">Next →</button>
+  </div>`;
+  return nav + subjectStatCards(stats) + `<div class="section"><button class="btn ghost" style="width:100%" onclick="exportPDF('monthly','${first}','${last}')">${icon('pdf')} Export monthly PDF</button></div>`;
+}
+function shiftMonth(dir){
+  monthAnchor = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth()+dir, 1); render();
+}
+function renderOverall(){
+  const stats = overallStats();
+  return subjectStatCards(stats) + `<div class="section"><button class="btn primary" style="width:100%" onclick="exportPDF('overall','${SET.semesterStart}','${todayStr()}')">${icon('pdf')} Export full report (PDF)</button></div>`;
+}
+function subjectStatCards(stats){
+  return `<div class="section">` + SUBJECTS.map(s=>{
+    const v = stats[s.name] || {total:0,present:0,missed:0,pct:null};
+    const pct = v.pct===null? 0 : v.pct;
+    const color = v.total===0? 'var(--ink-soft)' : ringColor(pct);
+    return `<div class="subject-pill" style="align-items:stretch;">
+      <div style="width:100%">
+        <div class="row1" style="display:flex;justify-content:space-between;">
+          <div><div style="font-weight:600;font-size:13.5px">${s.name}</div>
+          <div style="font-size:11px;color:var(--ink-soft)">${v.present} present · ${v.missed} missed · ${v.total} total</div></div>
+          <div style="font-family:var(--font-display);font-weight:700;font-size:17px;color:${color}">${v.total?pct+'%':'—'}</div>
+        </div>
+        <div class="progress-bar"><div style="width:${pct}%;background:${color}"></div></div>
+      </div>
+    </div>`;
+  }).join('') + `</div>`;
+}
+
+function renderHistory(){
+  const subjOpts = `<option value="all">All subjects</option>` + SUBJECTS.map(s=>`<option value="${s.name}" ${historyFilter.subject===s.name?'selected':''}>${s.name}</option>`).join('');
+  const filterBar = `<div class="section">
+    <div class="field-row">
+      <div class="field"><select id="hf_subject" onchange="historyFilter.subject=this.value;render()">${subjOpts}</select></div>
+      <div class="field"><select id="hf_status" onchange="historyFilter.status=this.value;render()">
+        <option value="all" ${historyFilter.status==='all'?'selected':''}>All statuses</option>
+        <option value="Present" ${historyFilter.status==='Present'?'selected':''}>Present</option>
+        <option value="Missed" ${historyFilter.status==='Missed'?'selected':''}>Missed</option>
+      </select></div>
+    </div>
+  </div>`;
+  let recs = ATT.slice().sort((a,b)=> b.date.localeCompare(a.date) || b.scheduledStart.localeCompare(a.scheduledStart));
+  if(historyFilter.subject!=='all') recs = recs.filter(r=>r.subject===historyFilter.subject);
+  if(historyFilter.status!=='all') recs = recs.filter(r=>r.status===historyFilter.status);
+  recs = recs.slice(0,150);
+  let rows = recs.length? recs.map(r=>`
+    <div class="hist-row">
+      <div class="hist-left"><div class="subj">${r.subject}</div><div class="d">${fmtDateNice(r.date)} · ${fmtTime(r.scheduledStart)}–${fmtTime(r.scheduledEnd)}${r.checkInTime?' · in '+fmtTime(r.checkInTime):''}</div></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="badge ${r.status==='Present'?'present':'missed'}">${r.status}</span>
+        <button class="headerbtn" style="width:30px;height:30px" onclick="openRecordEditor('${r.recId}')">${icon('edit')}</button>
+      </div>
+    </div>`).join('') : `<div class="empty">No records match this filter.</div>`;
+  return filterBar + `<div class="section"><div class="card" style="padding:4px 14px;">${rows}</div></div>`;
+}
+function openRecordEditor(recId){
+  editingRecord = ATT.find(r=>r.recId===recId);
+  if(!editingRecord) return;
+  const hist = editingRecord.editHistory.slice(-5).reverse().map(h=>`<div style="font-size:11px;color:var(--ink-soft);font-family:var(--font-mono);margin-bottom:3px;">${new Date(h.ts).toLocaleString('en-IN',{dateStyle:'short',timeStyle:'short'})} — ${h.action}</div>`).join('');
+  openSheet(`
+    <h3>${editingRecord.subject}</h3>
+    <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:14px;">${fmtDateNice(editingRecord.date)} · ${fmtTime(editingRecord.scheduledStart)}–${fmtTime(editingRecord.scheduledEnd)}</div>
+    <div class="field"><label>Status</label>
+      <div class="row-btns">
+        <button class="mini-btn ${editingRecord.status==='Present'?'':'ghost'}" style="flex:1" onclick="setStatus('${recId}','Present');closeSheet()">Present</button>
+        <button class="mini-btn ${editingRecord.status==='Missed'?'coral':'ghost'}" style="flex:1" onclick="setStatus('${recId}','Missed');closeSheet()">Missed</button>
+      </div>
+    </div>
+    <div class="field"><label>Edit history</label>${hist||'<div style="font-size:12px;color:var(--ink-soft)">No edits yet.</div>'}</div>
+    <div class="sheet-actions"><button class="btn ghost" style="width:100%" onclick="closeSheet()">Close</button></div>
+  `);
+}
+
+/* ============================================================
+   RENDER: ANALYTICS
+   ============================================================ */
+function renderAnalytics(){
+  reconcileMissed();
+  return `${topbarHtml('Analytics')}
+    <div class="section"><div class="section-title">Subject-wise Attendance</div><div class="card"><canvas id="chartSubj" height="200"></canvas></div></div>
+    <div class="section"><div class="section-title">Present vs Absent</div><div class="card"><canvas id="chartPie" height="200"></canvas></div></div>
+    <div class="section"><div class="section-title">Weekly Trend (last 6 weeks)</div><div class="card"><canvas id="chartWeekTrend" height="200"></canvas></div></div>
+    <div class="section"><div class="section-title">Monthly Trend</div><div class="card"><canvas id="chartMonthTrend" height="200"></canvas></div></div>
+  `;
+}
+let charts={};
+function destroyCharts(){ Object.values(charts).forEach(c=>c&&c.destroy()); charts={}; }
+function drawAnalyticsCharts(){
+  const stats = overallStats();
+  const labels = SUBJECTS.map(s=>s.name.length>16? s.name.slice(0,15)+'…':s.name);
+  const pcts = SUBJECTS.map(s=> (stats[s.name]&&stats[s.name].pct!==null)? stats[s.name].pct:0);
+  const colors = SUBJECTS.map(s=>s.color);
+  const styleColor = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#333';
+  const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--line').trim() || '#eee';
+
+  const c1 = document.getElementById('chartSubj');
+  if(c1) charts.subj = new Chart(c1, {type:'bar', data:{labels, datasets:[{data:pcts, backgroundColor:colors, borderRadius:6}]},
+    options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,max:100,ticks:{color:styleColor},grid:{color:gridColor}}, x:{ticks:{color:styleColor,font:{size:10}},grid:{display:false}}}}});
+
+  const totalPresent = Object.values(stats).reduce((a,v)=>a+v.present,0);
+  const totalMissed = Object.values(stats).reduce((a,v)=>a+v.missed,0);
+  const c2 = document.getElementById('chartPie');
+  if(c2) charts.pie = new Chart(c2, {type:'doughnut', data:{labels:['Present','Absent'], datasets:[{data:[totalPresent,totalMissed], backgroundColor:['#0F9E8E','#F0525C']}]},
+    options:{plugins:{legend:{position:'bottom',labels:{color:styleColor}}}}});
+
+  // weekly trend: last 6 weeks
+  const weeks=[]; let anchor=todayStr();
+  for(let i=5;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-7*i);
+    const [mon,sun]=weekRange(dstr(d));
+    const recs = recordsInRange(mon, sun<todayStr()?sun:todayStr());
+    const tot=recs.length, pres=recs.filter(r=>r.status==='Present').length;
+    weeks.push({label:fmtDateNice(mon), pct: tot? Math.round(pres/tot*1000)/10:0});
+  }
+  const c3 = document.getElementById('chartWeekTrend');
+  if(c3) charts.week = new Chart(c3, {type:'line', data:{labels:weeks.map(w=>w.label), datasets:[{data:weeks.map(w=>w.pct), borderColor:'#3B4CC0', backgroundColor:'rgba(59,76,192,0.12)', fill:true, tension:0.35, pointRadius:3}]},
+    options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,max:100,ticks:{color:styleColor},grid:{color:gridColor}}, x:{ticks:{color:styleColor,font:{size:10}},grid:{display:false}}}}});
+
+  // monthly trend: last 6 months
+  const months=[]; const base=new Date();
+  for(let i=5;i>=0;i--){
+    const d=new Date(base.getFullYear(), base.getMonth()-i, 1);
+    const [f,l]=monthRange(d.getFullYear(), d.getMonth());
+    const recs = recordsInRange(f, l<todayStr()?l:todayStr());
+    const tot=recs.length, pres=recs.filter(r=>r.status==='Present').length;
+    months.push({label:d.toLocaleDateString('en-IN',{month:'short'}), pct: tot? Math.round(pres/tot*1000)/10:0});
+  }
+  const c4 = document.getElementById('chartMonthTrend');
+  if(c4) charts.month = new Chart(c4, {type:'bar', data:{labels:months.map(m=>m.label), datasets:[{data:months.map(m=>m.pct), backgroundColor:'#0F9E8E', borderRadius:6}]},
+    options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,max:100,ticks:{color:styleColor},grid:{color:gridColor}}, x:{ticks:{color:styleColor},grid:{display:false}}}}});
+}
+
+/* ============================================================
+   RENDER: PROFILE / SETTINGS
+   ============================================================ */
+function renderProfile(){
+  return `${topbarHtml('Profile')}
+  <div class="section"><div class="section-title">Student</div>
+    <div class="card">
+      <div class="field"><label>Name</label><input id="p_name" value="${SET.studentName}" placeholder="Your name"></div>
+      <div class="field"><label>College</label><input id="p_college" value="${SET.college}"></div>
+      <div class="field-row">
+        <div class="field"><label>Course</label><input id="p_course" value="${SET.course}"></div>
+        <div class="field"><label>Semester</label><input id="p_sem" value="${SET.semester}"></div>
+      </div>
+      <button class="btn primary" style="width:100%" onclick="saveProfile()">Save</button>
+    </div>
+  </div>
+  <div class="section"><div class="section-title">Attendance Rules</div>
+    <div class="card">
+      <div class="field"><label>Attendance target %</label><input type="number" id="p_target" min="0" max="100" value="${SET.target}"></div>
+      <div class="field"><label>Calculation method</label>
+        <select id="p_calc">
+          <option value="standard" ${SET.calcMethod==='standard'?'selected':''}>Standard (Present ÷ Total)</option>
+          <option value="practical_weighted" ${SET.calcMethod==='practical_weighted'?'selected':''}>Practicals count double</option>
+          <option value="lectures_only" ${SET.calcMethod==='lectures_only'?'selected':''}>Lectures only</option>
+        </select>
+      </div>
+      <div class="field"><label>Semester start date</label><input type="date" id="p_start" value="${SET.semesterStart}"></div>
+      <button class="btn primary" style="width:100%" onclick="saveRules()">Save</button>
+    </div>
+  </div>
+  <div class="section"><div class="section-title">Notifications</div>
+    <div class="card">
+      <div class="field-row" style="align-items:center;">
+        <div style="flex:1"><div style="font-weight:600;font-size:13.5px">Class reminders</div><div style="font-size:11.5px;color:var(--ink-soft)">Notify before each class</div></div>
+        <input type="checkbox" id="p_notif" ${SET.notifEnabled?'checked':''} style="width:20px;height:20px;">
+      </div>
+      <div class="field"><label>Remind me</label>
+        <select id="p_remind">
+          ${[5,10,15,30].map(m=>`<option value="${m}" ${SET.reminderMins===m?'selected':''}>${m} minutes before</option>`).join('')}
+        </select>
+      </div>
+      <button class="btn primary" style="width:100%" onclick="saveNotif()">Save</button>
+    </div>
+  </div>
+  <div class="section"><div class="section-title">Appearance</div>
+    <div class="segmented">
+      <button class="${SET.theme==='light'?'active':''}" onclick="setTheme('light')">Light</button>
+      <button class="${SET.theme==='dark'?'active':''}" onclick="setTheme('dark')">Dark</button>
+      <button class="${SET.theme==='system'?'active':''}" onclick="setTheme('system')">System</button>
+    </div>
+  </div>
+  <div class="section"><div class="section-title">Data & Export</div>
+    <div class="card" style="display:flex;flex-direction:column;gap:10px;">
+      <button class="btn ghost" onclick="exportPDF('overall','${SET.semesterStart}','${todayStr()}')">${icon('pdf')} Export complete attendance report</button>
+      <div style="font-size:11px;color:var(--ink-soft)">Data is stored securely to your account and syncs automatically across sessions.</div>
+    </div>
+  </div>
+  `;
+}
+async function saveProfile(){
+  SET.studentName=document.getElementById('p_name').value;
+  SET.college=document.getElementById('p_college').value;
+  SET.course=document.getElementById('p_course').value;
+  SET.semester=document.getElementById('p_sem').value;
+  await saveSET(); showToast('Profile saved');
+}
+async function saveRules(){
+  SET.target = Number(document.getElementById('p_target').value)||75;
+  SET.calcMethod = document.getElementById('p_calc').value;
+  SET.semesterStart = document.getElementById('p_start').value || SET.semesterStart;
+  await saveSET(); showToast('Rules updated'); render();
+}
+async function saveNotif(){
+  SET.notifEnabled = document.getElementById('p_notif').checked;
+  SET.reminderMins = Number(document.getElementById('p_remind').value);
+  await saveSET(); showToast('Notification settings saved');
+  if(SET.notifEnabled && 'Notification' in window && Notification.permission==='default'){
+    Notification.requestPermission();
+  }
+}
+async function setTheme(t){ SET.theme=t; await saveSET(); applyTheme(); render(); }
+
+/* ============================================================
+   PDF EXPORT
+   ============================================================ */
+function exportPDF(mode, start, end){
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF();
+  const recs = recordsInRange(start,end);
+  const stats = statsFor(recs);
+  let y=18;
+  doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.text('AttendSure — Attendance Report',14,y); y+=8;
+  doc.setFontSize(10); doc.setFont('helvetica','normal');
+  doc.text(`Student: ${SET.studentName||'—'}`,14,y); y+=5;
+  doc.text(`College: ${SET.college}`,14,y); y+=5;
+  doc.text(`Course: ${SET.course}   Semester: ${SET.semester}`,14,y); y+=5;
+  doc.text(`Report: ${mode.toUpperCase()}   Period: ${fmtDateNice(start)} – ${fmtDateNice(end)}`,14,y); y+=9;
+  doc.setDrawColor(200); doc.line(14,y,196,y); y+=8;
+
+  doc.setFont('helvetica','bold'); doc.text('Subject',14,y); doc.text('Total',110,y); doc.text('Present',135,y); doc.text('Missed',162,y); doc.text('%',188,y);
+  y+=6; doc.setFont('helvetica','normal');
+  SUBJECTS.forEach(s=>{
+    const v = stats[s.name]||{total:0,present:0,missed:0,pct:null};
+    doc.text(s.name.slice(0,42),14,y);
+    doc.text(String(v.total),112,y);
+    doc.text(String(v.present),137,y);
+    doc.text(String(v.missed),164,y);
+    doc.text(v.total? v.pct+'%':'—',188,y);
+    y+=6;
+    if(y>270){doc.addPage(); y=18;}
+  });
+  y+=4; doc.setDrawColor(200); doc.line(14,y,196,y); y+=8;
+  const tot = Object.values(stats).reduce((a,v)=>a+v.total,0);
+  const pres = Object.values(stats).reduce((a,v)=>a+v.present,0);
+  const overallPct = tot? Math.round(pres/tot*1000)/10:0;
+  doc.setFont('helvetica','bold'); doc.text(`Overall Attendance: ${overallPct}%  (${pres}/${tot})`,14,y); y+=10;
+
+  doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(140);
+  doc.text('Generated by AttendSure on '+new Date().toLocaleString('en-IN'),14,y);
+
+  doc.save(`AttendSure_${mode}_${start}_to_${end}.pdf`);
+  showToast('PDF exported');
+}
+
+/* ============================================================
+   MODAL / SHEET
+   ============================================================ */
+function openSheet(html){
+  let ov = document.getElementById('overlay');
+  if(!ov){
+    ov = document.createElement('div'); ov.id='overlay'; ov.className='overlay';
+    ov.onclick=(e)=>{ if(e.target===ov) closeSheet(); };
+    document.body.appendChild(ov);
+  }
+  ov.innerHTML = `<div class="sheet">${html}</div>`;
+  ov.style.display='flex';
+}
+function closeSheet(){ const ov=document.getElementById('overlay'); if(ov) ov.style.display='none'; editingClass=null; editingRecord=null; }
+
+/* ============================================================
+   NAV / MASTER RENDER
+   ============================================================ */
+function go(tab){ TAB=tab; render(); }
+function render(){
+  destroyCharts();
+  const app = document.getElementById('app');
+  let html='';
+  if(TAB==='home') html = renderHome();
+  else if(TAB==='timetable') html = renderTimetable();
+  else if(TAB==='attendance') html = renderAttendance();
+  else if(TAB==='analytics') html = renderAnalytics();
+  else if(TAB==='profile') html = renderProfile();
+
+  app.innerHTML = html + navHtml();
+  if(TAB==='analytics') requestAnimationFrame(drawAnalyticsCharts);
+}
+function navHtml(){
+  const items=[
+    {k:'home', label:'Home', ic:'home'},
+    {k:'timetable', label:'Timetable', ic:'cal'},
+    {k:'attendance', label:'Attendance', ic:'check'},
+    {k:'analytics', label:'Analytics', ic:'chart'},
+    {k:'profile', label:'Profile', ic:'user'},
+  ];
+  return `<div class="bottomnav">${items.map(i=>`
+    <button class="navbtn ${TAB===i.k?'active':''}" onclick="go('${i.k}')">${icon(i.ic)}<span>${i.label}</span></button>
+  `).join('')}</div>`;
+}
+
+/* ============================================================
+   REMINDER LOOP (best-effort, while app is open)
+   ============================================================ */
+let notifiedIds = new Set();
+function reminderTick(){
+  if(!SET.notifEnabled) return;
+  const ds = todayStr();
+  const dn = dayNameOf(ds);
+  const classes = classesOnDay(dn);
+  const nm = nowMin();
+  classes.forEach(c=>{
+    const s = timeToMin(c.start);
+    const remindAt = s - SET.reminderMins;
+    const key = c.id+'_'+ds+'_pre';
+    if(nm===remindAt && !notifiedIds.has(key)){
+      notifiedIds.add(key);
+      fireNotification(`${c.subject} starts in ${SET.reminderMins} minutes`, `Room ${c.room} · ${fmtTime(c.start)}`);
+    }
+    const key2 = c.id+'_'+ds+'_start';
+    if(nm===s && !notifiedIds.has(key2)){
+      notifiedIds.add(key2);
+      fireNotification(`${c.subject} is starting`, `Don't forget to check in.`);
+    }
+  });
+}
+function fireNotification(title, body){
+  showToast(title);
+  if('Notification' in window && Notification.permission==='granted'){
+    try{ new Notification(title,{body}); }catch(e){}
+  }
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+async function boot(){
+  await loadAll();
+  applyTheme();
+  reconcileMissed();
+  render();
+  setInterval(()=>{ reconcileMissed(); reminderTick(); if(TAB==='home') render(); }, 30000);
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ()=>{ if(SET.theme==='system'){applyTheme(); render();} });
+}
+boot();
+</script>
+</body>
+</html>
