@@ -638,7 +638,7 @@ function renderHome(){
       else { badge=`<span class="badge upcoming">—</span>`; }
       return `<div class="rail-item ${cls}"><div class="class-card">
         <div class="row1"><div><div class="name">${c.subject}</div><div class="time">${fmtTime(c.start)} – ${fmtTime(c.end)} · Room ${c.room}</div></div>${badge}</div>
-        ${!r || r.status!=='Present' ? `<button class="mini-btn" onclick="checkIn('${c.id}')">Check In</button>` : ''}
+        ${!r || r.status!=='Present' ? `<button class="mini-btn" onclick="checkIn('${c.id}')">Check In</button>` : `<button class="mini-btn ghost" onclick="openRecordEditor('${r.recId}')">Not actually present? Edit</button>`}
       </div></div>`;
     }).join('') + `</div></div>`;
   }
