@@ -76,13 +76,8 @@ a{color:inherit;}
   padding:22px 20px 14px;
   display:flex;justify-content:space-between;align-items:flex-start;
 }
-.brand{display:flex;flex-direction:column;gap:2px;}
-.brand .mark{
-  font-family:var(--font-display);font-weight:700;font-size:22px;letter-spacing:-0.02em;
-  display:flex;align-items:center;gap:8px;
-}
-.brand .mark .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);display:inline-block;box-shadow:0 0 0 4px var(--teal-soft);}
-.brand .sub{font-size:12.5px;color:var(--ink-soft);font-family:var(--font-mono);}
+.brand{display:flex;flex-direction:column;gap:4px;}
+.brand .sub{font-size:12.5px;color:var(--ink-soft);font-family:var(--font-mono);margin-left:2px;}
 .headerbtn{
   width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);
   display:flex;align-items:center;justify-content:center;color:var(--ink-soft);
@@ -672,9 +667,18 @@ function ringSVG(pct, size, stroke, color){
   </svg>`;
 }
 
+const LOGO_SVG = `<svg width="140" height="32" viewBox="0 0 220 50" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AttendSure">
+  <defs><linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#3B4CC0"/><stop offset="100%" stop-color="#0F9E8E"/></linearGradient></defs>
+  <rect x="2" y="2" width="46" height="46" rx="12" fill="url(#lg1)"/>
+  <circle cx="25" cy="25" r="12" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="3"/>
+  <circle cx="25" cy="25" r="12" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="75.4" stroke-dashoffset="18.85" transform="rotate(-90 25 25)"/>
+  <path d="M18 26 L23 31 L33 19" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="44" cy="8" r="4" fill="#F5A623"/>
+  <text x="60" y="33" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="24" fill="currentColor">Attend<tspan fill="#0F9E8E">Sure</tspan></text>
+</svg>`;
 function topbarHtml(pageLabel){
   return `<div class="topbar">
-    <div class="brand"><div class="mark"><span class="dot"></span>AttendSure</div><div class="sub">${fmtDateNice(todayStr())}</div></div>
+    <div class="brand" style="color:var(--ink)">${LOGO_SVG}<div class="sub">${fmtDateNice(todayStr())}</div></div>
     <button class="headerbtn" onclick="go('profile')">${icon('user')}</button>
   </div>`;
 }
