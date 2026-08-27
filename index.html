@@ -1095,9 +1095,16 @@ function navHtml(){
     {k:'analytics', label:'Analytics', ic:'chart'},
     {k:'profile', label:'Profile', ic:'user'},
   ];
-  return `<div class="bottomnav">${items.map(i=>`
-    <button class="navbtn ${TAB===i.k?'active':''}" onclick="go('${i.k}')">${icon(i.ic)}<span>${i.label}</span></button>
-  `).join('')}</div>`;
+  return `<div class="bottomnav">
+  ${items.map(i=>`
+    <button class="navbtn ${TAB===i.k?'active':''}" onclick="go('${i.k}')">
+      ${icon(i.ic)}<span>${i.label}</span>
+    </button>
+  `).join('')}
+</div>
+<div style="text-align:center;padding:8px 0 90px;font-size:11px;color:var(--ink-soft);">
+  Made by <span style="color:#F0525C;">♥</span> Ashish — just for you
+</div>`;
 }
 
 /* ============================================================
