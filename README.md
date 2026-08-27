@@ -6,7 +6,7 @@ AttendSure is a modern, mobile-first student attendance management web app desig
 
 Add your GitHub Pages URL here after deployment:
 
-Live Demo: https://YOUR-USERNAME.github.io/attendsure/
+Live Demo: https://github.com/aasis161101-cloud/attendsure.git
 
 ✨ Features
 🏠 Dashboard
